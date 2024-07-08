@@ -6,7 +6,7 @@ on:
       - main
   workflow_dispatch:
     inputs:
-      tags:
+      environment:
         description: "Specify the deployment environment (DEV or PROD)"
         required: true
         default: "DEV"
@@ -32,7 +32,7 @@ jobs:
           ignore_sha: true
 
   deploy-dev:
-    if: github.event.inputs.tags == 'DEV' || github.event.inputs.tags == 'PROD'
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'DEV' || github.ref == 'refs/heads/main' }}
     name: Deploy DEV
     runs-on: ubuntu-latest
     env:
@@ -71,7 +71,7 @@ jobs:
            snow --version
 
   deploy-prod:
-    if: github.event.inputs.tags == 'PROD'
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'PROD' || github.ref == 'refs/heads/main' }}
     name: Deploy PROD
     runs-on: ubuntu-latest
     env:
