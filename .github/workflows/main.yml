@@ -23,7 +23,7 @@ jobs:
           ignore_sha: true
 
   deploy-dev:
-    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev' || github.ref == 'refs/heads/main' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev' }}
     name: Deploy DEV
     runs-on: ubuntu-latest
     steps:
