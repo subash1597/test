@@ -31,7 +31,7 @@ jobs:
         run: echo "Deploying to DEV environment"
 
   deploy-prod:
-    if: ${{ github.event.inputs.environment == 'prod' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod' }}
     name: Deploy PROD
     runs-on: ubuntu-latest
     steps:
