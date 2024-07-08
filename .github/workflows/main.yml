@@ -71,7 +71,7 @@ jobs:
            snow --version
 
   deploy-prod:
-    if: ${{ github.event.inputs.environment == 'prod' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod' || github.ref == 'refs/heads/main' }}
     name: Deploy PROD
     runs-on: ubuntu-latest
     env:
