@@ -32,7 +32,7 @@ jobs:
           ignore_sha: true
 
   deploy-dev:
-    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev' || github.ref == 'refs/heads/main' }}
+    if: github.event.inputs.tags == 'dev' || github.event.inputs.tags == 'PROD'
     name: Deploy DEV
     runs-on: ubuntu-latest
     env:
@@ -58,7 +58,7 @@ jobs:
       # Add more steps for DEV deployment here
 
   deploy-prod:
-    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod' }}
+    if: github.event.inputs.tags == 'prod'
     name: Deploy PROD
     runs-on: ubuntu-latest
     env:
