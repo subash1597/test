@@ -50,15 +50,7 @@ jobs:
       - name: Print environment variables (DEV)
         run: |
           echo "Printing environment variables for DEV deployment:"
-          echo "SNOWFLAKE_CONNECTIONS_MYCONNECTION_ACCOUNT=$SNOWFLAKE_CONNECTIONS_MYCONNECTION_ACCOUNT"
-          echo "SNOWFLAKE_CONNECTIONS_MYCONNECTION_USER=$SNOWFLAKE_CONNECTIONS_MYCONNECTION_USER"
-          echo "SNOWFLAKE_CONNECTIONS_MYCONNECTION_DATABASE=$SNOWFLAKE_CONNECTIONS_MYCONNECTION_DATABASE"
-          echo "SNOWFLAKE_CONNECTIONS_MYCONNECTION_SCHEMA=$SNOWFLAKE_CONNECTIONS_MYCONNECTION_SCHEMA"
-          echo "SNOWFLAKE_CONNECTIONS_MYCONNECTION_WAREHOUSE=$SNOWFLAKE_CONNECTIONS_MYCONNECTION_WAREHOUSE"
-          echo "SNOWFLAKE_CONNECTIONS_MYCONNECTION_ROLE=$SNOWFLAKE_CONNECTIONS_MYCONNECTION_ROLE"
-          echo "SNOWFLAKE_CONNECTIONS_MYCONNECTION_PRIVATE_KEY=$SNOWFLAKE_CONNECTIONS_MYCONNECTION_PRIVATE_KEY"
-          echo "SNOWFLAKE_CONNECTIONS_MYCONNECTION_AUTHENTICATOR=$SNOWFLAKE_CONNECTIONS_MYCONNECTION_AUTHENTICATOR"
-          # Add more echo statements for other variables if needed
+          echo "SNOWFLAKE_CONNECTIONS_MYCONNECTION_DATABASE=$SNOWFLAKE_CONNECTIONS_MYCONNECTION_DATABASE" 
 
       # Snowflake CLI installation
       - uses: Snowflake-Labs/snowflake-cli-action@v1
@@ -70,6 +62,7 @@ jobs:
       - name: Deploy Snowpark apps
         run: |
            snow --version
+           snow connection list
 
   deploy-prod:
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'PROD' }}
@@ -86,18 +79,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Print environment variables (DEV)
+      - name: Print environment variables (PROD)
         run: |
-          echo "Printing environment variables for DEV deployment:"
-          echo "SNOWFLAKE_CONNECTIONS_MYCONNECTION_ACCOUNT=$SNOWFLAKE_CONNECTIONS_MYCONNECTION_ACCOUNT"
-          echo "SNOWFLAKE_CONNECTIONS_MYCONNECTION_USER=$SNOWFLAKE_CONNECTIONS_MYCONNECTION_USER"
+          echo "Printing environment variables for PROD deployment:"
           echo "SNOWFLAKE_CONNECTIONS_MYCONNECTION_DATABASE=$SNOWFLAKE_CONNECTIONS_MYCONNECTION_DATABASE"
-          echo "SNOWFLAKE_CONNECTIONS_MYCONNECTION_SCHEMA=$SNOWFLAKE_CONNECTIONS_MYCONNECTION_SCHEMA"
-          echo "SNOWFLAKE_CONNECTIONS_MYCONNECTION_WAREHOUSE=$SNOWFLAKE_CONNECTIONS_MYCONNECTION_WAREHOUSE"
-          echo "SNOWFLAKE_CONNECTIONS_MYCONNECTION_ROLE=$SNOWFLAKE_CONNECTIONS_MYCONNECTION_ROLE"
-          echo "SNOWFLAKE_CONNECTIONS_MYCONNECTION_PRIVATE_KEY=$SNOWFLAKE_CONNECTIONS_MYCONNECTION_PRIVATE_KEY"
-          echo "SNOWFLAKE_CONNECTIONS_MYCONNECTION_AUTHENTICATOR=$SNOWFLAKE_CONNECTIONS_MYCONNECTION_AUTHENTICATOR"
-          # Add more echo statements for other variables if needed
 
       # Snowflake CLI installation
       - uses: Snowflake-Labs/snowflake-cli-action@v1
@@ -109,3 +94,4 @@ jobs:
       - name: Deploy Snowpark apps
         run: |
            snow --version
+           snow connection list
