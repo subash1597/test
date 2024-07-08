@@ -32,7 +32,7 @@ jobs:
           ignore_sha: true
 
   deploy-dev:
-    if: github.event.inputs.tags == 'dev' || github.event.inputs.tags == 'PROD'
+    if: github.event.inputs.tags == 'dev' || github.event.inputs.tags == 'prod'
     name: Deploy DEV
     runs-on: ubuntu-latest
     env:
