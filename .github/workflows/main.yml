@@ -36,7 +36,7 @@ jobs:
     name: Deploy DEV
     runs-on: ubuntu-latest
     env:
-      SNOWFLAKE_CONNECTIONS_MYCONNECTION_DATABASE: "dev"
+      SNOWFLAKE_CONNECTIONS_MYCONNECTION_DATABASE: "RSS_DEV"
     steps:
       - name: Echo environment
         run: echo "Deploying to DEV environment"
@@ -63,7 +63,7 @@ jobs:
     name: Deploy PROD
     runs-on: ubuntu-latest
     env:
-      SNOWFLAKE_CONNECTIONS_MYCONNECTION_DATABASE: "prod"
+      SNOWFLAKE_CONNECTIONS_MYCONNECTION_DATABASE: "RSS_PROD"
     steps:
       - name: Echo environment
         run: echo "Deploying to PROD environment"
