@@ -1,4 +1,4 @@
-name: build_and_deploy_test
+name: build_and_deploy
 
 on:
   push:
@@ -6,12 +6,19 @@ on:
       - main
   workflow_dispatch:
     inputs:
-      tag:
+      environment:
         description: "Specify the deployment environment (DEV or PROD)"
         required: true
-        type: string
-        default: DEV
-        
+
+env:
+  SNOWFLAKE_CONNECTIONS_MYCONNECTION_ACCOUNT: ${{ secrets.SNOWSQL_ACCOUNT }}
+  SNOWFLAKE_CONNECTIONS_MYCONNECTION_USER: ${{ secrets.SNOWSQL_USER }}
+  SNOWFLAKE_CONNECTIONS_MYCONNECTION_SCHEMA: ${{ secrets.SNOWSQL_SCHEMA }}
+  SNOWFLAKE_CONNECTIONS_MYCONNECTION_WAREHOUSE: ${{ secrets.SNOWSQL_WAREHOUSE }}
+  SNOWFLAKE_CONNECTIONS_MYCONNECTION_ROLE: ${{ secrets.SNOWSQL_ROLE }}
+  SNOWFLAKE_CONNECTIONS_MYCONNECTION_PRIVATE_KEY_PATH: "rsakey.pem"
+  SNOWFLAKE_CONNECTIONS_MYCONNECTION_AUTHENTICATOR: "SNOWFLAKE_JWT"
+
 jobs:
   cancel:
     name: Cancel Previous Deploy
@@ -23,27 +30,65 @@ jobs:
           access_token: ${{ secrets.GITHUB_TOKEN }}
           ignore_sha: true
 
-  version:
-     name: "Check Snowflake CLI version"
-     runs-on: ubuntu-latest
-     env:
-        SNOWFLAKE_CONNECTIONS_MYCONNECTION_ACCOUNT: ${{ secrets.SNOWSQL_ACCOUNT }}
-        SNOWFLAKE_CONNECTIONS_MYCONNECTION_USER: ${{ secrets.SNOWSQL_USER }}
-        SNOWFLAKE_CONNECTIONS_MYCONNECTION_SCHEMA: ${{ secrets.SNOWSQL_SCHEMA }}
-        SNOWFLAKE_CONNECTIONS_MYCONNECTION_WAREHOUSE: ${{ secrets.SNOWSQL_WAREHOUSE }}
-        SNOWFLAKE_CONNECTIONS_MYCONNECTION_ROLE: ${{ secrets.SNOWSQL_ROLE }}
-        SNOWFLAKE_CONNECTIONS_MYCONNECTION_PRIVATE_KEY_PATH: "rsakey.pem"
-        SNOWFLAKE_CONNECTIONS_MYCONNECTION_AUTHENTICATOR: "SNOWFLAKE_JWT"
+  deploy-dev:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment != 'PROD' || github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    name: Deploy DEV
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: RSS_DEV
+    steps:
+      - name: Echo environment
+        run: echo "Deploying to DEV environment"
 
-     steps:
-          # Checkout step is necessary if you want to use a config file from your repo
-        - name: Checkout repo
-          uses: actions/checkout@v4
-          with:
-            persist-credentials: false
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # Snowflake CLI installation
+      - uses: Snowflake-Labs/snowflake-cli-action@v1
+        with:
+          cli-version: "latest"
             
-        - name: print tag events
-          run: |
-           echo "${{ github.event.inputs.tag}}"
+      # Use the Snowflake CLI for deploying snowflake objects
+      - name: Deploy Snowpark apps
+        run: |
+           echo "${{ secrets.SNOWSQL_RSAKEY }}" >> rsakey.pem
+           find . -name "snowflake.yml"|while read fname; do
+            project_dir=`dirname "$fname"`
+            snow snowpark build --project "$project_dir"
+            snow snowpark deploy --replace --connection="myconnection" --project "$project_dir" --database "${{ env.ENVIRONMENT }}"
+            snow sql --filename "$project_dir/task_di_refresh_insights.sql" --connection="myconnection"  --database "${{ env.ENVIRONMENT }}"
+           done
+           
 
-  
+  deploy-prod:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'PROD' }}
+    name: Deploy PROD
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: RSS
+    steps:
+      - name: Echo environment
+        run: echo "Deploying to PROD environment"
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # Snowflake CLI installation
+      - uses: Snowflake-Labs/snowflake-cli-action@v1
+        with:
+          cli-version: "latest"
+            
+      # Use the Snowflake CLI for deploying snowflake objects
+      - name: Deploy Snowpark apps
+        run: |
+           echo "${{ secrets.SNOWSQL_RSAKEY }}" >> rsakey.pem
+           find . -name "snowflake.yml"|while read fname; do
+            project_dir=`dirname "$fname"`
+            snow snowpark build --project "$project_dir"
+            snow snowpark deploy --replace --connection="myconnection" --project "$project_dir" --database "${{ env.ENVIRONMENT }}"
+            snow sql --filename "$project_dir/task_di_refresh_insights.sql" --connection="myconnection"  --database "${{ env.ENVIRONMENT }}"
+           done
