@@ -53,6 +53,7 @@ jobs:
       # Use the Snowflake CLI for deploying snowflake objects
       - name: Deploy Snowpark apps
         run: |
+           echo "${{ env.ENVIRONMENT }}"
            echo "${{ secrets.SNOWSQL_RSAKEY }}" >> rsakey.pem
            find . -name "snowflake.yml"|while read fname; do
             project_dir=`dirname "$fname"`
@@ -85,6 +86,7 @@ jobs:
       # Use the Snowflake CLI for deploying snowflake objects
       - name: Deploy Snowpark apps
         run: |
+           echo "${{ env.ENVIRONMENT }}"
            echo "${{ secrets.SNOWSQL_RSAKEY }}" >> rsakey.pem
            find . -name "snowflake.yml"|while read fname; do
             project_dir=`dirname "$fname"`
