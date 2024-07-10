@@ -39,7 +39,9 @@ jobs:
       ENVIRONMENT: RSS_DEV # add ENVIRONMENT variable's here,  specifically for DEV deployment
     steps:
       - name: Echo environment
-        run: echo "Deploying to DEV environment"
+        run: |
+            echo "Deploying to DEV environment"
+            echo ""${{ env.ENVIRONMENT }}"
 
       - name: Checkout repo
         uses: actions/checkout@v4
