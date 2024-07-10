@@ -35,7 +35,7 @@ jobs:
     name: Deploy DEV
     runs-on: ubuntu-latest
     env:
-      ENVIRONMENT: RSS_DEV
+      ENVIRONMENT: RSS_DEV # add ENVIRONMENT variable's here,  specifically for DEV deployment
     steps:
       - name: Echo environment
         run: echo "Deploying to DEV environment"
@@ -68,7 +68,7 @@ jobs:
     name: Deploy PROD
     runs-on: ubuntu-latest
     env:
-      ENVIRONMENT: RSS
+      ENVIRONMENT: RSS # add ENVIRONMENT variable's here,  specifically for DEV deployment
     steps:
       - name: Echo environment
         run: echo "Deploying to PROD environment"
