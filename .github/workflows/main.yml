@@ -47,6 +47,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Print input tag value
+        run: echo "${{github.event.inputs.environment}}"
+
       - name: Print environment variables (DEV)
         run: |
           echo "Printing environment variables for DEV deployment:"
