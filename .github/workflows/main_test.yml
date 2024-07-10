@@ -1,0 +1,75 @@
+name: build_and_deploy_test
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Specify the deployment environment (DEV or PROD)"
+        required: true
+        type: string
+        
+jobs:
+  cancel:
+    name: Cancel Previous Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel runs
+        uses: styfle/cancel-workflow-action@0.9.0
+        with:
+          access_token: ${{ secrets.GITHUB_TOKEN }}
+          ignore_sha: true
+
+  version:
+     name: "Check Snowflake CLI version"
+     runs-on: ubuntu-latest
+     env:
+        SNOWFLAKE_CONNECTIONS_MYCONNECTION_ACCOUNT: ${{ secrets.SNOWSQL_ACCOUNT }}
+        SNOWFLAKE_CONNECTIONS_MYCONNECTION_USER: ${{ secrets.SNOWSQL_USER }}
+        SNOWFLAKE_CONNECTIONS_MYCONNECTION_SCHEMA: ${{ secrets.SNOWSQL_SCHEMA }}
+        SNOWFLAKE_CONNECTIONS_MYCONNECTION_WAREHOUSE: ${{ secrets.SNOWSQL_WAREHOUSE }}
+        SNOWFLAKE_CONNECTIONS_MYCONNECTION_ROLE: ${{ secrets.SNOWSQL_ROLE }}
+        SNOWFLAKE_CONNECTIONS_MYCONNECTION_PRIVATE_KEY_PATH: "rsakey.pem"
+        SNOWFLAKE_CONNECTIONS_MYCONNECTION_AUTHENTICATOR: "SNOWFLAKE_JWT"
+
+     steps:
+          # Checkout step is necessary if you want to use a config file from your repo
+        - name: Checkout repo
+          uses: actions/checkout@v4
+          with:
+            persist-credentials: false
+
+          # Snowflake CLI installation
+        - uses: Snowflake-Labs/snowflake-cli-action@v1
+          with:
+            cli-version: "latest"
+        
+        - name: Deploy Snowpark apps to DEV
+          if: ${{ github.event.inputs.tag != 'PROD' || github.event_name == 'push' && github.base_ref == 'refs/heads/main'}}
+          env:
+           ENVIRONMENT: RSS_DEV  # Set ENVIRONMENT variable specifically for DEV deployment
+          run: |
+           echo "${{ env.ENVIRONMENT }}"
+           echo "${{ secrets.SNOWSQL_RSAKEY }}" >> rsakey.pem
+           find . -name "snowflake.yml"|while read fname; do
+            project_dir=`dirname "$fname"`
+            snow connection list
+            snow snowpark build --project "$project_dir"
+            snow sql --filename "$project_dir/task_di_refresh_insights.sql" --connection="myconnection"  --database "${{ env.ENVIRONMENT }}"
+           done
+
+        - name: Deploy Snowpark apps to PROD
+          if: github.event.inputs.tag == 'PROD'
+          env:
+           ENVIRONMENT: RSS # Set ENVIRONMENT variable specifically for PROD deployment
+          run: |
+           echo "${{ env.ENVIRONMENT }}"
+           echo "${{ secrets.SNOWSQL_RSAKEY }}" >> rsakey.pem
+           find . -name "snowflake.yml"|while read fname; do
+            project_dir=`dirname "$fname"`
+            snow snowpark build --project "$project_dir"
+            snow snowpark deploy --replace --connection="myconnection" --project "$project_dir" --database "${{ env.ENVIRONMENT }}"
+            snow sql --filename "$project_dir/task_di_refresh_insights.sql" --connection="myconnection"  --database "${{ env.ENVIRONMENT }}"
+           done
