@@ -42,6 +42,8 @@ jobs:
         run: |
             echo "Deploying to DEV environment"
             echo "${{ github.event.inputs.environment }}"
+            echo "${{ env.SNOWFLAKE_CONNECTIONS_MYCONNECTION_AUTHENTICATOR }}"
+
 
       - name: Checkout repo
         uses: actions/checkout@v4
