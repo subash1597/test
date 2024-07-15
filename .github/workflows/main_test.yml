@@ -56,6 +56,7 @@ jobs:
         run: pytest templates --maxfail=1 --disable-warnings
 
   deploy-dev:
+    needs: tests
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'DEV' || github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     name: Deploy DEV
     runs-on: ubuntu-latest
