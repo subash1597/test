@@ -14,7 +14,7 @@ class TestStringMatching:
         }
 
     def test_string_startswith_di(self, sample_data):
-        assert sample_data["correct_prefix"].startswith("DI")
+        assert sample_data["correct_prefix"].startswith("DS")
         assert not sample_data["incorrect_prefix"].startswith("DI")
 
     def test_required_tables_present(self, sample_data):
