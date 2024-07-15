@@ -49,10 +49,6 @@ jobs:
           pip install pytest
 
       - name: Run tests
-        run: |
-          python -m unittest discover -s tests
-
-      - name: Run tests
         run: pytest templates --maxfail=1 --disable-warnings
 
   deploy-dev:
